@@ -17,7 +17,6 @@ import {
 } from "reactstrap";
 import { Control, LocalForm, Errors } from "react-redux-form";
 import { Link } from "react-router-dom";
-
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !val || val.length <= len;
 const minLength = (len) => (val) => val && val.length >= len;
@@ -29,6 +28,7 @@ class CommentForm extends Component {
       isModalOpen: false,
     };
     this.toggleModal = this.toggleModal.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   toggleModal() {
@@ -38,8 +38,13 @@ class CommentForm extends Component {
   }
 
   handleSubmit(values) {
-  
-    alert("Submitted Comment is: " + JSON.stringify(values));
+    this.toggleModal();
+    this.props.addComment(
+      this.props.dishId,
+      values.rating,
+      values.author,
+      values.comment
+    );
   }
 
   render() {
@@ -123,85 +128,65 @@ class CommentForm extends Component {
     );
   }
 }
-
 function RenderDish({ dish }) {
-  if (dish != null) {
-    return (
-      <div className="col-12 col-md-5 m-1">
-        <Card>
-          <CardImg width="100%" src={dish.image} alt={dish.name} />
-          <CardBody>
-            <CardTitle> {dish.name}</CardTitle>
-            <CardText> {dish.description} </CardText>
-          </CardBody>
-        </Card>
-      </div>
-    );
-  } else {
-    return <div></div>;
-  }
-}
-
-function RenderComments({ comments }) {
-  if (comments == null) {
-    return <div></div>;
-  }
-  const cmnts = comments.map((comment) => {
-    return (
-      <li key={comment.id}>
-        <p>{comment.comment}</p>
-        <p>
-          -- {comment.author}, &nbsp;
-          {new Intl.DateTimeFormat("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "2-digit",
-          }).format(new Date(comment.date))}
-        </p>
-      </li>
-    );
-  });
   return (
     <div className="col-12 col-md-5 m-1">
-      <h4> Comments </h4>
-      <ul className="list-unstyled">{cmnts}</ul>
-      <div>
-        <CommentForm />
-      </div>
+      <Card>
+        <CardImg top src={dish.image} alt={dish.name} />
+        <CardBody>
+          <CardTitle>{dish.name}</CardTitle>
+          <CardText>{dish.description}</CardText>
+        </CardBody>
+      </Card>
     </div>
   );
 }
 
-const DishDetail = (props) => {
-  const dish = props.dish;
-  const comments = props.comments;
-
-  console.log(dish);
-
-  if (dish == null) {
-    return <div></div>;
-  }
-
-  return (
-    <React.Fragment>
-      <div className="row">
-        <Breadcrumb>
-          <BreadcrumbItem>
-            <Link to="/menu"> Menu </Link>
-          </BreadcrumbItem>
-
-          <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
-        </Breadcrumb>
-        <div className="col-12">
-          <h3> {props.dish.name}</h3>
-          <hr />
-        </div>
+function RenderComments({ comments, addComment, dishId }) {
+  if (comments != null) {
+    return (
+      <div className="col-12 col-md-5 m-1">
+        <h4>Comments</h4>
+        {comments.map((comment) => (
+          <ul key={comment.id} className="list-unstyled">
+            <li className="mb-2">{comment.comment}</li>
+            <li>
+              -- {comment.author}{" "}
+              {new Intl.DateTimeFormat("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "2-digit",
+              }).format(new Date(Date.parse(comment.date)))}
+            </li>
+          </ul>
+        ))}
+        <CommentForm dishId={dishId} addComment={addComment} />
       </div>
-      <div className="row">
-        <RenderDish dish={props.dish} />
-        <RenderComments comments={props.comments} />
+    );
+  } else return <div />;
+}
+const DishDetailComponent = (props) => (
+  <div className="container">
+    <div className="row">
+      <Breadcrumb>
+        <BreadcrumbItem>
+          <Link to="/menu">Menu</Link>
+        </BreadcrumbItem>
+        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
+      </Breadcrumb>
+      <div className="col-12">
+        <h3>{props.dish.name}</h3>
+        <hr />
       </div>
-    </React.Fragment>
-  );
-};
-export default DishDetail;
+    </div>
+    <div className="row">
+      <RenderDish dish={props.dish} />
+      <RenderComments
+        comments={props.comments}
+        addComment={props.addComment}
+        dishId={props.dish.id}
+      />
+    </div>
+  </div>
+);
+export default DishDetailComponent;
