@@ -25,7 +25,6 @@ const mapStateToProps = (state) => {
     leaders: state.leaders,
   };
 };
-
 const mapDispatchToProps = (dispatch) => ({
   postComment: (dishId, rating, author, comment) =>
     dispatch(postComment(dishId, rating, author, comment)),
@@ -36,18 +35,15 @@ const mapDispatchToProps = (dispatch) => ({
   fetchComments: () => dispatch(fetchComments()),
   fetchPromos: () => dispatch(fetchPromos()),
 });
-
 class Main extends Component {
   constructor(props) {
     super(props);
   }
-
   componentDidMount() {
     this.props.fetchDishes();
     this.props.fetchComments();
     this.props.fetchPromos();
   }
-
   render() {
     const HomePage = () => {
       return (
@@ -66,7 +62,6 @@ class Main extends Component {
         />
       );
     };
-
     const DishWithId = ({ match }) => {
       return (
         <DishDetail
@@ -125,5 +120,4 @@ class Main extends Component {
     );
   }
 }
-
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Main));
